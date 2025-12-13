@@ -165,6 +165,9 @@ net_res <- construct_network(
 # Calculate topology
 topo_res <- calculate_topology(net_res$graph)
 
+# plot network
+plot(net_res$graph)
+
 # Global topology
 print(topo_res$global)
 
