@@ -7,6 +7,8 @@
 #' @importFrom Hmisc binconf
 #' @importFrom stats4 mle
 #' @importFrom stats coef confint dnorm pbeta ppois AIC BIC
+#' @importFrom ggplot2 ggplot geom_point scale_fill_manual scale_fill_discrete geom_line xlab ylab ggtitle annotate theme_bw theme element_blank element_line aes
+#' @importFrom rlang .data
 #' @export
 fit_sncm <- function(spp, pool = NULL, taxon = NULL) {
   options(warn = -1)
@@ -125,6 +127,7 @@ fit_sncm <- function(spp, pool = NULL, taxon = NULL) {
 #' @param fill Variable to fill points with, default "fit_class".
 #' @param title Plot title.
 #' @import ggplot2
+#' @importFrom rlang .data
 #' @export
 plot_sncm_fit <- function(spp_out, fill = NULL, title = NULL) {
   
@@ -135,6 +138,9 @@ plot_sncm_fit <- function(spp_out, fill = NULL, title = NULL) {
   if (is.null(fill)) {
     fill <- "fit_class"
   }
+  
+  # Bind global variables to avoid R CMD check notes
+  p <- freq <- freq.pred <- pred.lwr <- pred.upr <- NULL
   
   # Only use tax_levels if there are extra columns
   cols <- colnames(spp_out$predictions)
@@ -157,7 +163,7 @@ plot_sncm_fit <- function(spp_out, fill = NULL, title = NULL) {
   }
 
   
-  p <- ggplot(data = spp_out$predictions)
+  plt <- ggplot(data = spp_out$predictions)
   
   # Helper to safe-get count
   get_count <- function(pred_class) {
@@ -167,7 +173,7 @@ plot_sncm_fit <- function(spp_out, fill = NULL, title = NULL) {
   }
 
   if (fill == "fit_class") {
-    p <- p + geom_point(aes(x = log(p), y = freq, fill = .data[[fill]]), shape = 21, color = "black", size = 2, alpha = 0.75)
+    plt <- plt + geom_point(aes(x = log(p), y = freq, fill = .data[[fill]]), shape = 21, color = "black", size = 2, alpha = 0.75)
     
     # Calculate percentages
     richness <- spp_out$fitstats$Richness
@@ -180,7 +186,7 @@ plot_sncm_fit <- function(spp_out, fill = NULL, title = NULL) {
     )
     names(labels_vec) <- c("Above prediction", "As predicted", "Below prediction", "NA")
     
-    p <- p + scale_fill_manual(
+    plt <- plt + scale_fill_manual(
       name = "Prediction",
       values = c("Above prediction" = "seagreen", "As predicted" = "black", "Below prediction" = "tan1", "NA" = "white"),
       breaks = c("Above prediction", "As predicted", "Below prediction", "NA"),
@@ -190,24 +196,24 @@ plot_sncm_fit <- function(spp_out, fill = NULL, title = NULL) {
   } else {
     # Check if fill is in columns
     if (fill %in% colnames(spp_out$predictions)) {
-        p <- p + geom_point(aes(x = log(p), y = freq, fill = .data[[fill]]), shape = 21, color = "black", size = 2, alpha = 0.75)
-        p <- p + scale_fill_discrete(name = fill)
+        plt <- plt + geom_point(aes(x = log(p), y = freq, fill = .data[[fill]]), shape = 21, color = "black", size = 2, alpha = 0.75)
+        plt <- plt + scale_fill_discrete(name = fill)
     } else {
         warning(paste0("fill variable: ", fill, " is not a valid column in predictions"))
         # Fallback
-        p <- p + geom_point(aes(x = log(p), y = freq), shape = 21, color = "black", fill="grey", size = 2, alpha = 0.75)
+        plt <- plt + geom_point(aes(x = log(p), y = freq), shape = 21, color = "black", fill="grey", size = 2, alpha = 0.75)
     }
   }
   
-  p <- p + geom_line(aes(x = log(p), y = freq.pred), color = "dodgerblue4", lwd = 1.5)
-  p <- p + geom_line(aes(x = log(p), y = pred.lwr), color = "dodgerblue4", linetype = "dashed", lwd = 1.5)
-  p <- p + geom_line(aes(x = log(p), y = pred.upr), color = "dodgerblue4", linetype = "dashed", lwd = 1.5)
-  p <- p + xlab("log(Mean Relative Abundance)")
-  p <- p + ylab("Frequency")
-  if (!is.null(title)) p <- p + ggtitle(title)
-  p <- p + annotate("text", x = -5, y = 0.65, size = 5, label = r2_val, parse = TRUE)
-  p <- p + annotate("text", x = -5, y = 0.5, size = 5, label = m_val, parse = TRUE)
-  p <- p + theme_bw()
-  p <- p + theme(panel.grid = element_blank(), element_line(size = 1, colour = "black"))
-  return(p)
+  plt <- plt + geom_line(aes(x = log(p), y = freq.pred), color = "dodgerblue4", lwd = 1.5)
+  plt <- plt + geom_line(aes(x = log(p), y = pred.lwr), color = "dodgerblue4", linetype = "dashed", lwd = 1.5)
+  plt <- plt + geom_line(aes(x = log(p), y = pred.upr), color = "dodgerblue4", linetype = "dashed", lwd = 1.5)
+  plt <- plt + xlab("log(Mean Relative Abundance)")
+  plt <- plt + ylab("Frequency")
+  if (!is.null(title)) plt <- plt + ggtitle(title)
+  plt <- plt + annotate("text", x = -5, y = 0.65, size = 5, label = r2_val, parse = TRUE)
+  plt <- plt + annotate("text", x = -5, y = 0.5, size = 5, label = m_val, parse = TRUE)
+  plt <- plt + theme_bw()
+  plt <- plt + theme(panel.grid = element_blank(), element_line(size = 1, colour = "black"))
+  return(plt)
 }

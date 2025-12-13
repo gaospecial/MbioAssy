@@ -9,6 +9,7 @@
 #' @importFrom devEMF emf
 #' @importFrom graphics plot
 #' @importFrom utils write.table
+#' @importFrom grDevices dev.off
 #' @export
 run_cscore_var <- function(comm, nReps = 500, save_plot = FALSE, output_file = "c-score-var.summary.txt", plot_file = "c-score-var.hist.emf") {
   

@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Introduction
+## Introduction
 
 **MbioAssy** provides an integrated pipeline for assessing ecological stochasticity and determinism in microbial community assembly. This vignette demonstrates how to use the package to perform:
 
@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
 4.  C-score variance analysis
 5.  Co-occurrence Network construction and topology analysis
 
-# Loading Data
+## Loading Data
 
 The package includes example data in the `inst/extdata` directory. We first load the necessary data tables.
 
@@ -44,14 +44,11 @@ get_example_path <- function(file) {
 
 # Let's assume we are running this where we can access the files.
 data_dir <- system.file("extdata", package = "MbioAssy")
-if (data_dir == "") {
-  # Fallback for development if not installed
-  data_dir <- "../inst/extdata" 
-}
 
 # Load OTU table
 otu_file <- file.path(data_dir, "OTU.txt")
 otu_table <- t(read.table(otu_file, sep = "	", header = TRUE, row.names = 1)) # Samples x OTUs
+
 # Filter
 otu_table <- as.matrix(otu_table)
 otu_table <- otu_table[which(rowSums(otu_table) > 0), ]
@@ -76,12 +73,12 @@ tax_file <- file.path(data_dir, "Taxonomy.txt")
 tax_table <- read.table(tax_file, sep = "	", header = TRUE, row.names = 1)
 ```
 
-# 1. Normalized Stochasticity Ratio (NST) Analysis
+## 1. Normalized Stochasticity Ratio (NST) Analysis
 
 NST quantifies stochasticity in community assembly. 
 NST > 0.5 indicates stochasticity dominance; NST < 0.5 indicates determinism dominance.
 
-```{r nst_analysis, eval=FALSE}
+```{r nst_analysis}
 # Run NST (rand=20 for speed in vignette, normally 1000)
 nst_res <- run_nst(
   comm = otu_table, 
@@ -92,11 +89,11 @@ nst_res <- run_nst(
 head(nst_res)
 ```
 
-# 2. Neutral Model Analysis
+## 2. Neutral Model Analysis
 
 This module fits the Sloan neutral community model.
 
-```{r neutral_model, eval=FALSE}
+```{r neutral_model}
 # Fit neutral model
 nm_out <- fit_sncm(spp = otu_table)
 
@@ -108,11 +105,11 @@ print(p)
 print(nm_out$fitstats)
 ```
 
-# 3. iCAMP Analysis
+## 3. iCAMP Analysis
 
 iCAMP quantifies relative importance of ecological processes (Selection, Dispersal, Drift) at the bin level.
 
-```{r icamp_analysis, eval=FALSE}
+```{r icamp_analysis}
 # Create a temporary directory for outputs
 icamp_out_dir <- tempfile()
 dir.create(icamp_out_dir)
@@ -135,11 +132,11 @@ icamp_res <- run_icamp(
 print(icamp_res$icbin$Pt)
 ```
 
-# 4. C-score Variance Analysis
+## 4. C-score Variance Analysis
 
 C-score variance assesses co-occurrence patterns (aggregation vs. segregation).
 
-```{r cscore_analysis, eval=FALSE}
+```{r cscore_analysis
 # Run C-score analysis (nReps reduced for speed)
 cscore_model <- run_cscore_var(
   comm = otu_table,
@@ -151,11 +148,11 @@ cscore_model <- run_cscore_var(
 summary(cscore_model)
 ```
 
-# 5. Co-occurrence Network Analysis
+## 5. Co-occurrence Network Analysis
 
 Constructs and analyzes microbial interaction networks.
 
-```{r network_analysis, eval=FALSE}
+```{r network_analysis}
 # Construct network
 # For demonstration, we use a simple Spearman correlation without RMT
 net_res <- construct_network(
@@ -175,11 +172,11 @@ print(topo_res$global)
 head(topo_res$node[order(topo_res$node$node.degree, decreasing = TRUE), ])
 ```
 
-# 6. Random Network Generation
+## 6. Random Network Generation
 
 Generates random networks to compare with the empirical network.
 
-```{r random_network, eval=FALSE}
+```{r random_network}
 # Generate 10 random networks with same nodes and edges as empirical network
 n_nodes <- topo_res$global$v
 n_edges <- topo_res$global$e
@@ -188,6 +185,6 @@ rand_net_stats <- generate_random_networks(n = n_nodes, e = n_edges, reps = 10)
 head(rand_net_stats)
 ```
 
-# Conclusion
+## Conclusion
 
 The `MbioAssy` package simplifies the complex workflow of microbial community assembly analysis, making these advanced ecological methods more accessible.

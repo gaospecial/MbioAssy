@@ -1,6 +1,6 @@
 Package: MbioAssy
 Title: Integrated Analysis of Microbial Community Assembly
-Version: 0.1.0
+Version: 2.0.0
 Authors@R: c(
     person("Ling", "Yuan", email = "yuanling@westlake.edu.cn", role = c("aut", "cre")),
     person("Ze", "Zhao", email = "zhaoze@westlake.edu.cn", role = "aut"),
@@ -29,9 +29,13 @@ Imports:
     igraph,
     RMThreshold,
     graphics,
+    grDevices,
     stats,
-    utils
+    utils,
+    rlang
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    devtools,
+    roxygen2
 VignetteBuilder: knitr

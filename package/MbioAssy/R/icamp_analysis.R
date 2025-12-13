@@ -13,6 +13,8 @@
 #' @param bin_size_limit Minimum bin size, default 24.
 #' @return List containing iCAMP results (icres and icbin).
 #' @importFrom iCAMP match.name pdist.big dniche taxa.binphy.big ps.bin icamp.big icamp.bins
+#' @importFrom utils write.csv
+#' @importFrom ape read.tree
 #' @export
 run_icamp <- function(comm, tree, treat, env = NULL, clas, prefix = "iCAMP_Test", save_dir = tempdir(), 
                       rand = 1000, nworker = 4, memory_G = 50, bin_size_limit = 24) {
