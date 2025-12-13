@@ -1,0 +1,93 @@
+---
+title: "MbioAssy 2.0 功能详解"
+format: html
+editor: visual
+---
+
+# MbioAssy 2.0 简介
+
+MbioAssy 2.0 是一个集成的 R 语言脚本工具包，旨在量化评估微生物群落构建过程中的生态随机性（Stochasticity）和确定性（Determinism）。该版本整合了四个主要模块：标准化随机率（NST）计算、中性模型（Neutral Model）分析、iCAMP 空模型分析、C-score 方差分析，以及共现网络（Co-occurrence Network）构建与分析功能。
+
+主要参考文献包括： - Ning et al. (2019) PNAS (NST) - Burns et al. (2016) ISME J (Neutral Model) - Ning et al. (2020) Nature Communications (iCAMP) - Ju et al. (2014) Environmental Microbiology (Network & C-score)
+
+------------------------------------------------------------------------
+
+# 模块功能详细介绍
+
+## 1. 标准化随机率计算 (Normalized Stochasticity Ratio, NST)
+
+**功能描述**： 基于零模型（Null Model）量化群落构建中的随机性程度。NST 值介于 0 到 1 之间，以 0.5 为分界线（\>0.5 表示随机性主导，\<0.5 表示确定性主导）。
+
+**输入文件 (Input)**： \* `OTU.txt`: 微生物丰度表（列为 OTU，行为样本）。 \* `Group.txt`: 样本分组信息表。
+
+**输出文件 (Output)**： \* `NST.output.txt`: 包含不同组别的 NST 指数计算结果摘要。
+
+**代码对应**：`1_NST.R`
+
+------------------------------------------------------------------------
+
+## 2. 中性模型分析 (Neutral Model Analysis)
+
+**功能描述**： 基于 Sloan 中性群落模型，评估随机过程（扩散和生态漂变）对群落构建的贡献。该模型预测分类单元在局域群落中的出现频率与其在元群落中的平均相对丰度之间的关系。
+
+**输入文件 (Input)**： \* `OTU.txt`: 微生物丰度表。
+
+**输出文件 (Output)**： \* `Neutral.model.plot.pdf`: 中性模型拟合曲线图，展示物种出现频率与平均相对丰度的关系，并标注 $R^2$ 和迁移率 $m$。 \* `Neutral.model.details.txt`: 每个物种的详细预测数据（如观测频率、预测频率、是否在中性预测范围内）。
+
+**代码对应**：`2_Neutral_model.R`
+
+------------------------------------------------------------------------
+
+## 3. iCAMP 空模型分析 (iCAMP Assembly)
+
+**功能描述**： 通过推断群落组装机制的系统发育分箱（Binning）方法（iCAMP），定量分析不同生态过程（如均质选择、变量选择、扩散限制、均质扩散、漂变等）对群落构建的相对重要性。这是一种比传统 QPEN/NST 更精细的方法，因为它在不同的系统发育分箱（Bin）水平上进行评估。
+
+**输入文件 (Input)**： \* `OTU.txt`: 微生物丰度表。 \* `Tree.nwk`: 系统发育树文件。 \* `Group.txt`: 样本分组信息。 \* `Env.txt`: 环境因子变量表（用于生态位差异分析）。 \* `Taxonomy.txt`: 物种分类信息表。
+
+**输出文件 (Output)**： \* `Test.ProcessImportance_EachGroup.csv`: 每组样本中各生态过程的相对重要性。 \* `Test.ProcessImportance_EachBin_EachGroup.csv`: 每个 Bin 在每组样本中受各生态过程支配的程度。 \* `Test.BinContributeToProcess_EachGroup.csv`: 每个 Bin 对各生态过程重要性的贡献度。 \* `Test.Taxon_Bin.csv` & `Test.Bin_TopTaxon.csv`: Bin 与分类单元的对应关系及主要物种信息。 \* `Test.iCAMP.Summary.rda`: 包含完整分析结果的 R 数据对象。
+
+**代码对应**：`3_iCAMP_Assembly.R`
+
+------------------------------------------------------------------------
+
+## 4. C-score 方差分析 (C-score-var Analysis)
+
+**功能描述**： 通过计算 C-score（Checkerboard score）的方差来推断群落构建机制。结合生态位理论，用于评估物种间的竞争排斥或环境过滤作用。
+
+**输入文件 (Input)**： \* `OTU.txt`: 微生物丰度表。
+
+**输出文件 (Output)**： \* `c-score-var.summary.txt`: 包含 C-score 方差分析的统计摘要。 \* `c-score-var.hist.500.emf`: 观测值与随机模拟值分布的直方图。
+
+**代码对应**：`4_C-score-var.R`
+
+------------------------------------------------------------------------
+
+## 5. 共现网络构建 (Co-occurrence Network Construction)
+
+包含两种构建方法：
+
+### 5.1 基础共现网络
+
+**功能描述**：基于 Spearman 相关性系数构建网络，通过设定的相关系数阈值（如 \>0.8）和显著性 P 值（如 \<0.05）来确定物种间的连接。
+
+### 5.2 RMT 基于随机矩阵理论的网络 (RMT-based)
+
+**功能描述**：利用随机矩阵理论（RMT）自动寻找最优的相关性阈值，而不是人为设定固定阈值，从而构建更加客观的生态网络。
+
+**输入文件 (Input)**： \* `OTU.txt`: 微生物丰度表。
+
+**输出文件 (Output)**： \* `Network.gml`: 网络文件，可用 Gephi 或 Cytoscape 可视化。 \* `Network.global.topology.csv`: 全局拓扑属性（如节点数、边数、平均路径长度、模块化程度等）。 \* `Network.node.topology.csv`: 节点拓扑属性（如度、介数中心性、接近中心性等）。
+
+**代码对应**：`5.1_Co-occurrence_network.R` 和 `5.2_RMT_Co-occurrence_network.R`
+
+------------------------------------------------------------------------
+
+## 6. 随机网络生成 (Random Network)
+
+**功能描述**： 生成与观测网络具有相同节点数和边数的随机网络（Erdős-Rényi 模型），用于比较和验证观测网络的非随机性拓扑特征。
+
+**输入参数**： \* 代码中需手动设定节点数 `n` 和边数 `e`。
+
+**输出文件 (Output)**： \* `N[n]E[e].er.random.network.xls`: 1000 个随机网络的全局拓扑属性统计表。
+
+**代码对应**：`6_Random_network.R`
