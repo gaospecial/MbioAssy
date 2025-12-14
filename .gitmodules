@@ -1,0 +1,3 @@
+[submodule "package/MBioAssy2"]
+	path = package/MBioAssy2
+	url = git@github.com:gaospecial/MbioAssy2.git
